@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algorithmic Composition Synthesis</title>
+    <style>
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: #0f111a;
+            color: #e2e2e2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .app-wrapper {
+            display: flex;
+            gap: 30px;
+            max-width: 1000px;
+            width: 100%;
+            min-height: 500px;
+        }
+
+        .sidebar {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 300px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar h3 {
+            margin-top: 0;
+            margin-bottom: 25px;
+            color: #4facfe;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 15px;
+            font-size: 1.4rem;
+            letter-spacing: 1px;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            background: rgba(0, 0, 0, 0.25);
+            padding: 15px 18px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .setting-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        /* Tooltip styles */
+        .tooltip-container {
+            position: relative;
+            display: inline-flex;
+            cursor: help;
+        }
+
+        .info-icon {
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            font-family: monospace;
+            transition: background 0.2s;
+        }
+
+        .info-icon:hover {
+            background: #4facfe;
+        }
+
+        .tooltip-text {
+            visibility: hidden;
+            width: 220px;
+            background-color: #222;
+            color: #fff;
+            text-align: center;
+            border-radius: 8px;
+            padding: 10px;
+            position: absolute;
+            z-index: 10;
+            bottom: 135%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s, bottom 0.3s;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            pointer-events: none;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -6px;
+            border-width: 6px;
+            border-style: solid;
+            border-color: #222 transparent transparent transparent;
+        }
+
+        .tooltip-container:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+            bottom: 150%;
+        }
+
+        /* Toggle Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #3a3a4a;
+            transition: .4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        input:checked+.slider {
+            background: linear-gradient(90deg, #4facfe, #00f2fe);
+        }
+
+        input:focus+.slider {
+            box-shadow: 0 0 1px #4facfe;
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(24px);
+        }
+
+        .slider.round {
+            border-radius: 34px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+
+        /* Main Container */
+        .main-content {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 3rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            text-align: center;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        h1 {
+            margin-top: 0;
+            background: -webkit-linear-gradient(#4facfe, #00f2fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        p.subtitle {
+            color: #a0a0a0;
+            font-size: 1.1rem;
+            margin-bottom: 40px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 16px 48px;
+            color: white;
+            font-size: 1.3rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(118, 75, 162, 0.3);
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 25px rgba(118, 75, 162, 0.5);
+        }
+
+        button:active {
+            transform: translateY(1px);
+            box-shadow: 0 5px 10px rgba(118, 75, 162, 0.3);
+        }
+
+        #status {
+            margin-top: 30px;
+            font-size: 1.1rem;
+            color: #4facfe;
+            min-height: 26px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+    </style>
+    <script src="https://surikov.github.io/webaudiofont/npm/dist/WebAudioFontPlayer.js"></script>
+</head>
+
+<body>
+    <div class="app-wrapper">
+        <!-- Settings Sidebar -->
+        <aside class="sidebar">
+            <h3>Parameters</h3>
+            
+            <div class="setting-item" style="flex-direction: column; align-items: flex-start; gap: 10px;">
+                <div class="setting-label">
+                    <span>Starting Sequence</span>
+                    <div class="tooltip-container">
+                        <span class="info-icon">i</span>
+                        <div class="tooltip-text">Comma-separated pitch classes (0-11) for the initial set.</div>
+                    </div>
+                </div>
+                <input type="text" id="startingSet" value="0, 11, 3, 4" style="width: 100%; padding: 8px; border-radius: 6px; background: rgba(0,0,0,0.5); color: white; border: 1px solid rgba(255,255,255,0.1); outline: none; box-sizing: border-box;">
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>Pivot On First Note</span>
+                    <div class="tooltip-container">
+                        <span class="info-icon">i</span>
+                        <div class="tooltip-text">When ON, pitch inversions pivot around the phrase's own starting note
+                            rather than universally pivoting around C. This preserves the original register.</div>
+                    </div>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="thematicToggle">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+
+
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span>Octave Displacement</span>
+                    <div class="tooltip-container">
+                        <span class="info-icon">i</span>
+                        <div class="tooltip-text">When ON, each note is randomly shifted one octave up (+12), one octave
+                            down (-12), or stays in its base octave. Creates a wider, glitchier melodic gesture.</div>
+                    </div>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="octaveToggle">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+
+            <div class="setting-item" style="margin-bottom: 5px;">
+                <div class="setting-label">
+                    <span>Euclidean Rhythm</span>
+                    <div class="tooltip-container">
+                        <span class="info-icon">i</span>
+                        <div class="tooltip-text">When ON, dynamically distributes Notes (Hits) as evenly as possible across a set number of Steps, creating syncopated rhythms.</div>
+                    </div>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="euclideanToggle">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+
+            <div id="euclideanControls" style="display: none; flex-direction: column; gap: 10px; margin-bottom: 15px; padding: 10px 18px; background: rgba(0, 0, 0, 0.15); border-radius: 12px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <label style="font-size: 0.9rem; color: #ccc;">Hits (Pulses)</label>
+                    <input type="number" id="euclideanHits" value="3" min="1" max="64" style="width: 60px; padding: 4px 8px; border-radius: 4px; background: rgba(0,0,0,0.5); color: white; border: 1px solid rgba(255,255,255,0.1); outline: none;">
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <label style="font-size: 0.9rem; color: #ccc;">Steps (Grid)</label>
+                    <input type="number" id="euclideanSteps" value="8" min="2" max="64" style="width: 60px; padding: 4px 8px; border-radius: 4px; background: rgba(0,0,0,0.5); color: white; border: 1px solid rgba(255,255,255,0.1); outline: none;">
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <label style="font-size: 0.9rem; color: #ccc;">Offset</label>
+                    <input type="number" id="euclideanOffset" value="2" min="0" max="64" style="width: 60px; padding: 4px 8px; border-radius: 4px; background: rgba(0,0,0,0.5); color: white; border: 1px solid rgba(255,255,255,0.1); outline: none;">
+                </div>
+            </div>
+            <div class="setting-item" style="flex-direction: column; align-items: flex-start; gap: 10px;">
+                <div class="setting-label">
+                    <span>Instrument</span>
+                </div>
+                <select id="instrumentSelect"
+                    style="width: 100%; padding: 8px; border-radius: 6px; background: rgba(0,0,0,0.5); color: white; border: 1px solid rgba(255,255,255,0.1); outline: none;">
+                    <option value="sine">Basic Sine Wave</option>
+                    <option value="_tone_0000_JCLive_sf2_file">Piano</option>
+                    <option value="_tone_0240_JCLive_sf2_file">Acoustic Guitar</option>
+                    <option value="_tone_0270_JCLive_sf2_file">Electric Guitar</option>
+                    <option value="_tone_0560_JCLive_sf2_file">Trumpet</option>
+                    <option value="_tone_0570_JCLive_sf2_file">Trombone</option>
+                    <option value="_tone_0580_JCLive_sf2_file">Tuba</option>
+                    <option value="_tone_0650_JCLive_sf2_file">Alto Saxophone</option>
+                </select>
+            </div>
+
+            <div class="setting-item" style="flex-direction: column; align-items: flex-start; gap: 10px;">
+                <div class="setting-label" style="width: 100%; justify-content: space-between;">
+                    <span>Note Duration</span>
+                    <span id="durationValue">0.25s</span>
+                </div>
+                <input type="range" id="durationSlider" min="0.05" max="1.0" step="0.05" value="0.25"
+                    style="width: 100%; cursor: pointer;">
+            </div>
+
+            <div class="setting-item" style="flex-direction: column; align-items: flex-start; gap: 10px;">
+                <div class="setting-label">
+                    <span>Sine Wave ADSR Envelope</span>
+                </div>
+                <div style="display: flex; flex-direction: column; width: 100%; gap: 8px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: #ccc;">
+                        <label>Attack</label><input type="range" id="adsrA" min="0.01" max="1.0" step="0.01" value="0.05" style="width: 60%;">
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: #ccc;">
+                        <label>Decay</label><input type="range" id="adsrD" min="0.01" max="1.0" step="0.01" value="0.1" style="width: 60%;">
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: #ccc;">
+                        <label>Sustain</label><input type="range" id="adsrS" min="0.0" max="1.0" step="0.01" value="0.5" style="width: 60%;">
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: #ccc;">
+                        <label>Release</label><input type="range" id="adsrR" min="0.01" max="3.0" step="0.01" value="0.2" style="width: 60%;">
+                    </div>
+                </div>
+            </div>
+
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <h1>Algorithmic Composition</h1>
+            <p class="subtitle">Pitch Set Theory to Web Audio API</p>
+            <button id="playBtn">Generate & Play</button>
+            <div id="status"></div>
+        </main>
+    </div>
+
+    <script type="module" src="./app.js"></script>
+</body>
+
+</html>

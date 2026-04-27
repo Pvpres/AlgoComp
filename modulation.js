@@ -15,7 +15,10 @@ function transposition(arr, interval) {
     return ans
 }
 
-function inversion(arr, pivot = 0) {
+function inversion(arr, pivot = 0, thematic = false) {
+    if (thematic) {
+        pivot = arr[0];
+    }
     let ans = []
     for (let i = 0; i < arr.length; i++) {
         ans[i] = (((pivot - arr[i]) % 12) + 12) % 12;

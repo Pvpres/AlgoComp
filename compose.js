@@ -10,7 +10,7 @@ const rules = {
 };
 let lastTransform = null;
 
-function generateNextSection() {
+function generateNextSection(isThematic) {
     let transformName = pickTransformation();
 
     if (transformName === 'transpose') {
@@ -21,7 +21,7 @@ function generateNextSection() {
         currentSet = transformations.retrograde(currentSet);
         console.log(`Applied Retrograde`);
     } else if (transformName === 'inversion') {
-        currentSet = transformations.inversion(currentSet);
+        currentSet = transformations.inversion(currentSet, 0, isThematic);
         console.log(`Applied Inversion`);
     }
 
@@ -48,10 +48,25 @@ function pickTransformation() {
     return chosenName;
 }
 
-console.log(`Initial Seed: [${currentSet}]`);
+export function generateComposition(isThematic = false, customInitialSet = null) {
+    // 1. Initial State
+    // The original set: C(0), B(11), Eb(3), E(4)
+    currentSet = (customInitialSet && customInitialSet.length > 0) ? customInitialSet : [0, 4, 7, 11];
 
-for (let i = 0; i < 10; i++) {
-    const newSet = generateNextSection();
-    composition.push(newSet);
-    console.log(`Resulting Set ${i + 1}: [${newSet}]\n`);
+    // Array to hold all generated sets for the composition
+    composition.length = 0;
+
+    // Push the initial set
+    composition.push([...currentSet]);
+    lastTransform = null;
+
+    console.log(`Initial Seed: [${currentSet}]`);
+
+    for (let i = 0; i < 10; i++) {
+        const newSet = generateNextSection(isThematic);
+        composition.push([...newSet]);
+        console.log(`Resulting Set ${i + 1}: [${newSet}]\n`);
+    }
+
+    return composition;
 }
