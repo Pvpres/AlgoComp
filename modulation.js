@@ -27,5 +27,5 @@ function inversion(arr, pivot = 0, thematic = false) {
 }
 
 function retrograde(arr) {
-    return arr.reverse();
+    return [...arr].reverse();
 }

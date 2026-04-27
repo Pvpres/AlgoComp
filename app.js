@@ -38,7 +38,7 @@ playBtn.addEventListener('click', () => {
     const isOctaveDisplacement = octaveToggle.checked;
     const instrument = instrumentSelect.value;
     const noteDuration = parseFloat(durationSlider.value);
-    
+
     const euclidean = {
         enabled: euclideanToggle.checked,
         hits: parseInt(euclideanHits.value, 10),
@@ -47,10 +47,10 @@ playBtn.addEventListener('click', () => {
     };
 
     const adsr = {
-        attack: parseFloat(adsrA.value),
-        decay: parseFloat(adsrD.value),
-        sustain: parseFloat(adsrS.value),
-        release: parseFloat(adsrR.value)
+        attack: adsrA ? parseFloat(adsrA.value) : 0.05,
+        decay: adsrD ? parseFloat(adsrD.value) : 0.1,
+        sustain: adsrS ? parseFloat(adsrS.value) : 0.5,
+        release: adsrR ? parseFloat(adsrR.value) : 0.2
     };
 
     // Fix: Read and parse the starting set input
@@ -62,11 +62,11 @@ playBtn.addEventListener('click', () => {
     // 3. Generate new composition
     statusDiv.textContent = "Generating composition...";
     const composition = generateComposition(isThematic, startingSetInput);
-    
+
     // 4. Play the composition
     playBtn.disabled = true;
     statusDiv.textContent = "Playing...";
-    
+
     schedulePlayback(composition, isOctaveDisplacement, instrument, noteDuration, euclidean, adsr, () => {
         playBtn.disabled = false;
         statusDiv.textContent = "Finished playback.";
